@@ -1,7 +1,6 @@
 import React, { lazy } from "react";
 import "./App.css";
 import { Feature, Loading, Off, On } from "./components/Feature";
-import LazyComponent from "./components/LazyComponent";
 import { feature1, feature2 } from "./state";
 
 const Feature1 = lazy(() => import("./components/feature/Feature1"));
@@ -19,28 +18,21 @@ function App() {
       <main>
         <Feature id={feature1}>
           <On>
-            <LazyComponent
-              Component={Feature1}
-              loading={<Loading>Loading Feature 1...</Loading>}
-            />
+            <Feature1 />
           </On>
           <Off>
             <p>You don't have permissions for Feature 1 </p>
           </Off>
-          {/* <Loading><p>LOADING</p></Loading> */}
+          <Loading><p>Loading feature 1...</p></Loading>
         </Feature>
         <Feature id={feature2}>
           <On>
-            {/* We need to specify the path RELATIVE to where LazyComponent is declared */}
-            <LazyComponent
-              Component={Feature2}
-              loading={<Loading>Loading Feature 2...</Loading>}
-            />
+            <Feature2 />
           </On>
           <Off>
             <p>You don't have permissions for Feature 2 </p>
           </Off>
-          {/* <Loading><p>LOADING</p></Loading> */}
+          <Loading><p>Loading feature 2...</p></Loading>
         </Feature>
       </main>
     </div>
