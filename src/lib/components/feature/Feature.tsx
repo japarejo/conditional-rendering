@@ -1,13 +1,10 @@
-import React, { Suspense } from "react";
-import { RecoilValue, useRecoilValue } from "recoil";
+import React, { Suspense, useContext } from "react";
+import { FeatureContext, FeatureMap } from "./FeatureContext";
 
 interface FeatureProps {
-  id: RecoilValue<boolean>;
-  children: (React.ReactElement<OnProps> | React.ReactElement<OffProps>)[];
+  id: string;
+  children: React.ReactNode;
 }
-
-interface OffProps {}
-interface OnProps {}
 
 export function On({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
@@ -22,7 +19,8 @@ export function Loading({ children }: { children: React.ReactNode }) {
 }
 
 export function Feature({ id, children }: FeatureProps) {
-  const feature = useRecoilValue(id);
+
+  const context = useContext<FeatureMap>(FeatureContext);
 
   // Gets children of Feature.On
   const onChildren = React.Children.toArray(children).filter((child) => {
@@ -44,7 +42,7 @@ export function Feature({ id, children }: FeatureProps) {
 
   // TODO: Inject loading property here to the lazy components
 
-  if (feature) {
+  if (context[id]) {
     return <Suspense fallback={loading}>{onChildren}</Suspense>;
   } else {
     return <>{offChildren}</>;

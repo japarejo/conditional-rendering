@@ -1,15 +1,26 @@
+import { ChakraProvider } from "@chakra-ui/react";
+import { FeatureContext } from "lib/components/feature/FeatureContext";
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
 import App from "./App";
+import "./index.css";
 import reportWebVitals from "./reportWebVitals";
-import { RecoilRoot } from "recoil";
+
+const FEATURE_MAP = {
+    "pet-list": true,
+    "pet-read": true,
+    "pet-edit": false,
+    "pet-add": false,
+    "pet-delete": false
+}
 
 ReactDOM.render(
   <React.StrictMode>
-    <RecoilRoot>
-      <App />
-    </RecoilRoot>
+    <FeatureContext.Provider value={FEATURE_MAP}>
+      <ChakraProvider>
+        <App />
+      </ChakraProvider>
+    </FeatureContext.Provider>
   </React.StrictMode>,
   document.getElementById("root")
 );

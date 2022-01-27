@@ -1,40 +1,29 @@
-import React, { lazy } from "react";
+import { Feature, On } from "lib/components/feature/Feature";
+import useFeature from "lib/components/feature/useFeature";
+import React from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Main from "routes/main";
+import PetEdit from "routes/pet/pet-edit";
+import Welcome from "routes/welcome";
 import "./App.css";
-import { Feature, Loading, Off, On } from "./components/Feature";
-import { feature1, feature2 } from "./state";
-
-const Feature1 = lazy(() => import("./components/feature/Feature1"));
-const Feature2 = lazy(() => import("./components/feature/Feature2"));
-
 
 function App() {
   document.title = "Feature tests";
+  const canRead = useFeature("pet-read");
+  const canAdd = useFeature("pet-add");
 
   return (
     <div className="App">
-      <header>
-        <h1>Test App Features</h1>
-      </header>
-      <main>
-        <Feature id={feature1}>
-          <On>
-            <Feature1 />
-          </On>
-          <Off>
-            <p>You don't have permissions for Feature 1 </p>
-          </Off>
-          <Loading><p>Loading feature 1...</p></Loading>
-        </Feature>
-        <Feature id={feature2}>
-          <On>
-            <Feature2 />
-          </On>
-          <Off>
-            <p>You don't have permissions for Feature 2 </p>
-          </Off>
-          <Loading><p>Loading feature 2...</p></Loading>
-        </Feature>
-      </main>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Main />}>
+            <Route path="/" element={<Welcome />} />
+            {canAdd && <Route path="pet" element={<PetEdit />} />}
+            {canRead && <Route path="pet/:petId" element={<PetEdit />} />}
+            <Route path="*" element={<p>There's nothing here!</p>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
