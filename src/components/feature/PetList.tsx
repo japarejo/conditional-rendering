@@ -1,23 +1,16 @@
-import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
-import {
-  Button,
-  Center,
-  HStack,
-  IconButton,
-  Spinner,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  VStack,
-} from "@chakra-ui/react";
+import
+  {
+    Button, Spinner,
+    Table,
+    Tbody,
+    Td, Th,
+    Thead,
+    Tr,
+    VStack
+  } from "@chakra-ui/react";
 import { Pet } from "api/Pet";
 import { PetRequest } from "api/PetRequest";
 import axios from "axios";
-import AppLink from "components/common/AppLink";
 import LinkButton from "components/common/LinkButton";
 import { Feature, On } from "lib/components/feature/Feature";
 import useFeature from "lib/components/feature/useFeature";
@@ -29,8 +22,19 @@ export default function PetList() {
   const [loading, setLoading] = useState(true);
   //   const [currentPage, setCurrentPage] = useState(0);
   const [resetCounter, setResetCounter] = useState(0);
-  const canRead = useFeature("pet-read");
-  const canEdit = useFeature("pet-edit");
+  const readFeature = useFeature({
+    id: "pet-read",
+  });
+  const editFeature = useFeature({
+    id: "pet-edit"
+  });
+
+  const canReadOrEdit = readFeature.enabled || editFeature.enabled;
+  // const editButtonFeature = useFeature({
+  //   value: canReadOrEdit,
+  // })
+
+  // TODO: Think about how to pass props to feature...
 
   useEffect(() => {
     axios
@@ -45,19 +49,6 @@ export default function PetList() {
 
   return (
     <VStack w="100%">
-      {/* <HStack spacing="20px">
-        <IconButton
-          colorScheme="blue"
-          aria-label="Back"
-          icon={<ArrowBackIcon />}
-        />
-        <Text>Page 1</Text>
-        <IconButton
-          colorScheme="blue"
-          aria-label="Forward"
-          icon={<ArrowForwardIcon />}
-        />
-      </HStack> */}
       <Table maxW="1000px">
         <Thead>
           <Tr>
@@ -65,8 +56,8 @@ export default function PetList() {
             <Th>Name</Th>
             <Th>Quantity</Th>
             <Th>Category</Th>
-            {canRead && <Th>Edit</Th>}
-            <Feature id="pet-delete">
+            {readFeature.enabled && <Th>Edit</Th>}
+            <Feature flags="pet-delete">
               <On>
                 <Th>Delete</Th>
               </On>
@@ -80,18 +71,18 @@ export default function PetList() {
               <Td>{pet.name}</Td>
               <Td>{pet.quantity}</Td>
               <Td>{pet.category.name}</Td>
-              {canRead && (
+              {(canReadOrEdit) && (
                 <Td>
                   <LinkButton
                     to={`/pet/${pet.id}`}
                     as={Button}
                     colorScheme="green"
                   >
-                    {canEdit ? "Edit" : "View"}
+                    {editFeature.enabled ? "Edit" : "View"}
                   </LinkButton>
                 </Td>
               )}
-              <Feature id="pet-delete">
+              <Feature flags="pet-delete">
                 <On>
                   <Td>
                     <DeleteButton

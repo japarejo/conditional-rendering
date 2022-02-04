@@ -1,5 +1,7 @@
 import { atom } from "recoil";
 
+// UNUSED
+
 export const feature1 = atom({
     key: 'can.read.feature1', //
     default: false

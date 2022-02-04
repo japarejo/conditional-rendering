@@ -1,22 +1,23 @@
 import { ChakraProvider } from "@chakra-ui/react";
 import { FeatureContext } from "lib/components/feature/FeatureContext";
+import FeatureRetriever from "lib/components/feature/FeatureRetriever";
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
-const FEATURE_MAP = {
-    "pet-list": true,
-    "pet-read": true,
-    "pet-edit": false,
-    "pet-add": false,
-    "pet-delete": false
-}
+// const FEATURE_MAP = {
+//     "pet-list": true,
+//     "pet-read": true,
+//     "pet-edit": false,
+//     "pet-add": false,
+//     "pet-delete": true
+// }
 
 ReactDOM.render(
   <React.StrictMode>
-    <FeatureContext.Provider value={FEATURE_MAP}>
+    <FeatureContext.Provider value={new FeatureRetriever()}>
       <ChakraProvider>
         <App />
       </ChakraProvider>

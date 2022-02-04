@@ -1,9 +1,7 @@
 import React from "react";
+import FeatureRetriever from "./FeatureRetriever";
 
-export interface FeatureMap {
-    [key: string]: boolean;
-}
 
-export const FeatureContext = React.createContext<FeatureMap>({});
+export const FeatureContext = React.createContext<FeatureRetriever>(new FeatureRetriever());
 
 

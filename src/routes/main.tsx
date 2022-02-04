@@ -23,7 +23,7 @@ export default function Main() {
           </HStack>
           <HStack spacing="20px">
             <AppLink to="/">Home</AppLink>
-            <Feature id="pet-add">
+            <Feature flags="pet-add" >
               <On><AppLink to="/pet">Add a pet</AppLink></On>
             </Feature>
           </HStack>

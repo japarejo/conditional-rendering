@@ -1,15 +1,12 @@
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  InputGroup,
-  Select,
-  Text,
-  useToast,
-  VStack,
-} from "@chakra-ui/react";
+import
+  {
+    Button,
+    FormControl, FormLabel,
+    Input, Select,
+    Text,
+    useToast,
+    VStack
+  } from "@chakra-ui/react";
 import { Category, Pet } from "api/Pet";
 import axios from "axios";
 import { Form, Formik } from "formik";
@@ -27,7 +24,9 @@ const petSchema = Yup.object().shape({
 export default function EditForm({ pet }: { pet?: Pet }) {
   const toast = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
-  const canEdit = useFeature("pet-edit");
+  const editFeature = useFeature({
+    id: "pet-edit"
+  });
 
   useEffect(() => {
     axios
@@ -83,7 +82,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
             <FormControl variant="filled">
               <FormLabel>Name</FormLabel>
               <Input
-                disabled={!canEdit}
+                disabled={!editFeature.enabled}
                 bg="white"
                 name="name"
                 value={values.name}
@@ -98,7 +97,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
               <FormLabel>Quantity</FormLabel>
               <Input
                 name="quantity"
-                disabled={!canEdit}
+                disabled={!editFeature.enabled}
                 bg="white"
                 type="number"
                 value={values.quantity}
@@ -112,7 +111,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
             <FormControl>
               <FormLabel>Category</FormLabel>
               <Select
-                disabled={!canEdit}
+                disabled={!editFeature.enabled}
                 bg="white"
                 name="category"
                 value={values.category}
@@ -129,7 +128,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
                 {errors.category}
               </Text>
             </FormControl>
-            <Feature id="pet-edit">
+            <Feature flags="pet-edit">
               <On>
                 <Button
                   colorScheme="blue"
