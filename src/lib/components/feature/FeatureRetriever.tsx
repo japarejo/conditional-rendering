@@ -1,7 +1,6 @@
 import axios from "axios";
 
 interface FeatureRequest {
-  id: string;
   onComplete: (result: boolean) => void;
   onError: () => void;
 }
@@ -13,16 +12,10 @@ export default class FeatureRetriever {
     baseURL: "http://localhost:8080/",
   });
 
-  featureRequestQueue: FeatureRequest[] = [];
+  featureRequestQueue: Record<string, FeatureRequest> = {};
   featureMap: Record<string, boolean> = {};
 
   tickInterval?: NodeJS.Timer;
-
-  init() {
-    this.tickInterval = setInterval(() => {
-      this.tickRequestQueue();
-    }, this.WINDOW_DELAY);
-  }
 
   tickRequestQueue() {
 
@@ -31,9 +24,16 @@ export default class FeatureRetriever {
     // sino tambien requests donde aparece la misma feature varias veces
 
     console.log("Ticking...", this.featureRequestQueue);
-    if (this.featureRequestQueue.length === 0) return;
+    if (Object.keys(this.featureRequestQueue).length === 0) {
+      if (this.tickInterval)
+      {
+        clearInterval(this.tickInterval);
+        delete this.tickInterval;
+      }
+      return;
+    };
 
-    const ids = this.featureRequestQueue.map((f) => f.id);
+    const ids = Object.keys(this.featureRequestQueue);
     this.AXIOS_INSTANCE.post<Record<string, boolean>>(`/feature`, ids)
       .then((response) => {
         this.processFeatureRequest(response.data);
@@ -41,11 +41,12 @@ export default class FeatureRetriever {
       .catch((error) => {
         console.error(error);
         // Clear all the requests
-        for (const featureRequest of this.featureRequestQueue) {
+        for (const featureRequest of Object.values(this.featureRequestQueue)) {
           featureRequest.onError();
         }
-        this.featureRequestQueue.length = 0;
+        this.featureRequestQueue = {};
         clearInterval(this.tickInterval!);
+        delete this.tickInterval;
       });
   }
 
@@ -56,7 +57,10 @@ export default class FeatureRetriever {
    * @returns A promise that resolves with the feature boolean value
    */
   getFeature(ids: string[]): Promise<boolean> {
-    if (!this.tickInterval) this.init();
+    if (!this.tickInterval) {
+      // if the tick interval 
+      this.tickInterval = setInterval(() => this.tickRequestQueue(), this.WINDOW_DELAY);
+    }
     // console.log("Requested feature", ids);
     return new Promise(async (resolve, reject) => {
       // Iterate through ids, get every individual feature
@@ -89,11 +93,10 @@ export default class FeatureRetriever {
    */
   addFeatureToQueue(featureId: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      this.featureRequestQueue.push({
-        id: featureId,
+      this.featureRequestQueue[featureId] = {
         onComplete: resolve,
         onError: reject,
-      });
+      };
     });
   }
 
@@ -122,17 +125,11 @@ export default class FeatureRetriever {
   setFeature(id: string, value: boolean) {
     this.featureMap[id] = value;
     // Call relevant pending callbacks and remove from queue
-    const newQueue = [];
-    for (const featureRequest of this.featureRequestQueue) {
-      if (featureRequest.id === id) {
+    for (const [featureId, featureRequest] of Object.entries(this.featureRequestQueue)) {
+      if (featureId === id) {
         featureRequest.onComplete(value);
-      } else {
-        newQueue.push(featureRequest);
+        delete this.featureRequestQueue[featureId];
       }
     }
-    console.log(
-      "Set feature", id, "to", value, "and updated queue to", newQueue
-    );
-    this.featureRequestQueue = newQueue;
   }
 }

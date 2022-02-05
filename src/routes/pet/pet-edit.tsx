@@ -37,7 +37,7 @@ export default function PetEdit() {
         })
         .finally(() => setLoading(false));
     }
-  }, [params.petId]);
+  }, [readFeature.enabled, toast, params.petId]);
 
   if (loading) {
     return <Spinner />;
