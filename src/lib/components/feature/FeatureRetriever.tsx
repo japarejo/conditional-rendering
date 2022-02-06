@@ -1,4 +1,5 @@
 import axios from "axios";
+import { FeatureValue } from "./useNonBooleanFeature";
 
 interface FeatureRequest {
   onComplete: (result: boolean) => void;
@@ -56,7 +57,7 @@ export default class FeatureRetriever {
    * @param ids A list of ids
    * @returns A promise that resolves with the feature boolean value
    */
-  getFeature(ids: string[]): Promise<boolean> {
+  getFeature(ids: string[]): Promise<FeatureValue> {
     if (!this.tickInterval) {
       // if the tick interval 
       this.tickInterval = setInterval(() => this.tickRequestQueue(), this.WINDOW_DELAY);
@@ -75,6 +76,8 @@ export default class FeatureRetriever {
       )
         .then((values) => {
           // All features are true
+          // TODO: !!! What if it's not a boolean feature???
+          // What do we resolve to?
           resolve(values.every((v) => v));
         })
         .catch(() => {

@@ -1,14 +1,16 @@
 import React, { Suspense } from "react";
-import useFeature from "./useFeature";
+import useNonBooleanFeature, { FeatureValue } from "./useNonBooleanFeature";
 
 type FeatureProps =
   | {
       flags: string | string[];
       value?: undefined;
+      expectedValue?: FeatureValue
     }
   | {
       flags?: undefined;
       value: boolean;
+      expectedValue?: undefined
     };
 
 type FeaturePropsWithChildren = FeatureProps & { children: React.ReactNode };
@@ -29,7 +31,7 @@ export function ErrorFallback({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export function Feature({ flags, value, children }: FeaturePropsWithChildren) {
+export function Feature({ flags, value, children, expectedValue }: FeaturePropsWithChildren) {
   // Gets children of Feature.On
   const onChildren = React.Children.toArray(children).filter((child) => {
     const c = child as React.ReactElement;
@@ -67,25 +69,21 @@ export function Feature({ flags, value, children }: FeaturePropsWithChildren) {
       }
     }
   }
-  const feature = useFeature({
+  
+  const feature = useNonBooleanFeature({
     ...flagObj,
     value,
     on: onChildren,
     off: offChildren,
     loading,
     error,
+    expectedValue: expectedValue??true
   });
 
-  // console.log(feature);
   return <>{feature.feature}</>;
 
   // return <Suspense fallback={loading}>{feature.feature}</Suspense>;
 
-  // // TODO: Inject loading property here to the lazy components
+  // // TODO: Inject properties into children
 
-  // if (context[id]) {
-  //   return <Suspense fallback={loading}>{onChildren}</Suspense>;
-  // } else {
-  //   return <>{offChildren}</>;
-  // }
 }

@@ -7,14 +7,6 @@ import App from "./App";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
-// const FEATURE_MAP = {
-//     "pet-list": true,
-//     "pet-read": true,
-//     "pet-edit": false,
-//     "pet-add": false,
-//     "pet-delete": true
-// }
-
 ReactDOM.render(
   <React.StrictMode>
     <FeatureContext.Provider value={new FeatureRetriever()}>

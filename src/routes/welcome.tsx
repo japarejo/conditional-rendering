@@ -1,6 +1,5 @@
 import { Heading, Text } from "@chakra-ui/react";
 import PetList from "components/feature/PetList";
-import {  ErrorFallback, Feature, Loading, Off, On } from "lib/components/feature/Feature";
 import useFeature from "lib/components/feature/useFeature";
 
 export default function Welcome() {
