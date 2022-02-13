@@ -14,7 +14,7 @@ export default function Welcome() {
     <>
       <Heading mb="10px">Welcome to Pet Shop</Heading>
       <Text mb="20px">Simple featurized Pet Shop app using ReactJS</Text>
-      {petListFeature.feature}
+      {petListFeature}
       
     </>
   );

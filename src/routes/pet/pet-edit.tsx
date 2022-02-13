@@ -20,7 +20,7 @@ export default function PetEdit() {
   });
 
   useEffect(() => {
-    if (readFeature.enabled && params.petId) {
+    if (params.petId) {
       axios
         .get<Pet>(`http://localhost:8080/pet/${params.petId}`)
         .then((data) => {
@@ -37,7 +37,7 @@ export default function PetEdit() {
         })
         .finally(() => setLoading(false));
     }
-  }, [readFeature.enabled, toast, params.petId]);
+  }, [toast, params.petId]);
 
   if (loading) {
     return <Spinner />;

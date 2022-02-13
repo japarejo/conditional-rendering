@@ -1,13 +1,14 @@
-import
-  {
-    Button, Spinner,
-    Table,
-    Tbody,
-    Td, Th,
-    Thead,
-    Tr,
-    VStack
-  } from "@chakra-ui/react";
+import {
+  Button,
+  Spinner,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  VStack,
+} from "@chakra-ui/react";
 import { Pet } from "api/Pet";
 import { PetRequest } from "api/PetRequest";
 import axios from "axios";
@@ -24,15 +25,13 @@ export default function PetList() {
   const [resetCounter, setResetCounter] = useState(0);
   const readFeature = useFeature({
     id: "pet-read",
+    on: <Th>Edit</Th>,
   });
   const editFeature = useFeature({
-    id: "pet-edit"
+    id: "pet-edit",
+    on: "Edit",
+    off: "View",
   });
-
-  const canReadOrEdit = readFeature.enabled || editFeature.enabled;
-  // const editButtonFeature = useFeature({
-  //   value: canReadOrEdit,
-  // })
 
   // TODO: Think about how to pass props to feature...
 
@@ -56,7 +55,7 @@ export default function PetList() {
             <Th>Name</Th>
             <Th>Quantity</Th>
             <Th>Category</Th>
-            {readFeature.enabled && <Th>Edit</Th>}
+            {readFeature}
             <Feature flags="pet-delete">
               <On>
                 <Th>Delete</Th>
@@ -71,17 +70,19 @@ export default function PetList() {
               <Td>{pet.name}</Td>
               <Td>{pet.quantity}</Td>
               <Td>{pet.category.name}</Td>
-              {(canReadOrEdit) && (
-                <Td>
-                  <LinkButton
-                    to={`/pet/${pet.id}`}
-                    as={Button}
-                    colorScheme="green"
-                  >
-                    {editFeature.enabled ? "Edit" : "View"}
-                  </LinkButton>
-                </Td>
-              )}
+              <Feature flags="pet-read">
+                <On>
+                  <Td>
+                    <LinkButton
+                      to={`/pet/${pet.id}`}
+                      as={Button}
+                      colorScheme="green"
+                    >
+                      {editFeature}
+                    </LinkButton>
+                  </Td>
+                </On>
+              </Feature>
               <Feature flags="pet-delete">
                 <On>
                   <Td>

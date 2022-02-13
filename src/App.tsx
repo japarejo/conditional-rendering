@@ -24,8 +24,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Main />}>
             <Route path="/" element={<Welcome />} />
-            {addRoute.feature}
-            {readRoute.feature}
+            {addRoute}
+            {readRoute}
             <Route path="*" element={<p>There's nothing here!</p>} />
           </Route>
         </Routes>

@@ -1,53 +1,60 @@
 import axios from "axios";
 import { FeatureValue } from "./useNonBooleanFeature";
 
+type OnCompleteCallback = (result: FeatureValue) => void;
+type OnErrorCallback = () => void;
+
 interface FeatureRequest {
-  onComplete: (result: boolean) => void;
-  onError: () => void;
+  onComplete: OnCompleteCallback;
+  onError: OnErrorCallback;
 }
 
 export default class FeatureRetriever {
   // request window delay in ms
   WINDOW_DELAY = 1000;
+  REQUEST_TIMEOUT = 5000;
   AXIOS_INSTANCE = axios.create({
     baseURL: "http://localhost:8080/",
+    timeout: this.REQUEST_TIMEOUT,
   });
 
-  featureRequestQueue: Record<string, FeatureRequest> = {};
-  featureMap: Record<string, boolean> = {};
+  queueMain: Record<string, FeatureRequest[]> = {};
+  queueRequest: Record<string, FeatureRequest[]> = {};
 
-  tickInterval?: NodeJS.Timer;
+  featureMap: Record<string, FeatureValue> = {};
+
+  tickTimeout?: NodeJS.Timeout;
 
   tickRequestQueue() {
-
-    // TODO: Arreglar ventana de requests.
-    // Ahora mismo, se hacen no solo varias request de una misma feature,
-    // sino tambien requests donde aparece la misma feature varias veces
-
-    console.log("Ticking...", this.featureRequestQueue);
-    if (Object.keys(this.featureRequestQueue).length === 0) {
-      if (this.tickInterval)
-      {
-        clearInterval(this.tickInterval);
-        delete this.tickInterval;
-      }
+    console.log("Ticking...", this.queueMain);
+    if (Object.keys(this.queueMain).length === 0) {
       return;
-    };
+    }
 
-    const ids = Object.keys(this.featureRequestQueue);
+    // Copy main queue to request queue, and empty queue
+    this.queueRequest = { ...this.queueMain };
+    this.queueMain = {};
+
+    const ids = Object.keys(this.queueRequest);
+    // TODO non boolean feature
     this.AXIOS_INSTANCE.post<Record<string, boolean>>(`/feature`, ids)
       .then((response) => {
-        this.processFeatureRequest(response.data);
+        this.processFeatureResponse(response.data);
+        // Once we're done, set a new timeout.
+        this.tickTimeout = setTimeout(() => this.tickRequestQueue(), this.WINDOW_DELAY);
       })
       .catch((error) => {
         console.error(error);
         // Clear all the requests
-        for (const featureRequest of Object.values(this.featureRequestQueue)) {
-          featureRequest.onError();
+        for (const featureRequest of Object.values(this.queueRequest)) {
+          for (const req of featureRequest) {
+            req.onError();
+          }
         }
-        this.featureRequestQueue = {};
-        clearInterval(this.tickInterval!);
-        delete this.tickInterval;
+        this.queueRequest = {};
+        // We stop the queue.
+        // clearInterval(this.tickInterval!);
+        // delete this.tickInterval;
       });
   }
 
@@ -58,10 +65,6 @@ export default class FeatureRetriever {
    * @returns A promise that resolves with the feature boolean value
    */
   getFeature(ids: string[]): Promise<FeatureValue> {
-    if (!this.tickInterval) {
-      // if the tick interval 
-      this.tickInterval = setInterval(() => this.tickRequestQueue(), this.WINDOW_DELAY);
-    }
     // console.log("Requested feature", ids);
     return new Promise(async (resolve, reject) => {
       // Iterate through ids, get every individual feature
@@ -71,7 +74,9 @@ export default class FeatureRetriever {
           if (id in this.featureMap) {
             return Promise.resolve(this.featureMap[id]);
           }
-          return this.addFeatureToQueue(id);
+          return new Promise((res, rej) => {
+            this.addFeatureToQueue(id, res, rej);
+          });
         })
       )
         .then((values) => {
@@ -87,51 +92,78 @@ export default class FeatureRetriever {
   }
 
   /**
-   * Adds a feature request to the queue.
+   * Adds a feature request to the relevant queue.
    * @param featureId Id of the feature to retrieve
    * @returns A promise
    * that will be resolved once we know the feature value, that is, as soon as
    * the server returns it (even if we didn't request it explicitly - i.e. it
    * was returned together with a parent feature)
    */
-  addFeatureToQueue(featureId: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      this.featureRequestQueue[featureId] = {
-        onComplete: resolve,
-        onError: reject,
-      };
-    });
+  addFeatureToQueue(
+    featureId: string,
+    onComplete: OnCompleteCallback,
+    onError: OnErrorCallback
+  ): void {
+    if (!this.tickTimeout) {
+      // if the tick interval
+      this.tickTimeout = setTimeout(
+        () => this.tickRequestQueue(),
+        this.WINDOW_DELAY
+      );
+    }
+
+    if (featureId in this.queueMain) {
+      // Add callback to queueMain
+      this.queueMain[featureId].push({ onComplete, onError });
+    } else if (featureId in this.queueRequest) {
+      // Add callback to queueRequest
+      this.queueRequest[featureId].push({ onComplete, onError });
+    } else {
+      // Add to queueMain
+      this.queueMain[featureId] = [{ onComplete, onError }];
+    }
   }
 
   /**
    * Processes the map of features that came from the server
    * @param retrievedFeatures Dictionary of retrieved features
    */
-  processFeatureRequest(retrievedFeatures: Record<string, boolean>) {
+  processFeatureResponse(retrievedFeatures: Record<string, boolean>) {
     console.log("received features", retrievedFeatures);
     for (const featureId of Object.keys(retrievedFeatures)) {
+      // Call relevant callbacks
       this.setFeature(featureId, retrievedFeatures[featureId]);
+      // Delete feature from request queue
+      delete this.queueRequest[featureId];
     }
-    console.log(
-      "After processing the received features, remaining queue is",
-      this.featureRequestQueue
-    );
+    // If request queue not empty, that means we asked for an invalid feature
+    for (const featureId of Object.keys(this.queueRequest)) {
+      for (const req of this.queueRequest[featureId]) {
+        req.onError();
+      }
+      console.warn(
+        `Feature ${featureId} wasn't returned by the server. Check the feature id?`
+      );
+      delete this.queueRequest[featureId];
+    }
   }
 
   /**
-   * Updates the feature map with the given feature. Updates
-   * the feature request queue accordingly, removing items that
-   * we already know the value of, and resolving pending promises.
+   * Updates the feature map with the given feature, and resolves
+   * relevant pending feature requests.
    * @param id Id of the feature
    * @param value Value of the feature
    */
-  setFeature(id: string, value: boolean) {
+  setFeature(id: string, value: FeatureValue) {
     this.featureMap[id] = value;
     // Call relevant pending callbacks and remove from queue
-    for (const [featureId, featureRequest] of Object.entries(this.featureRequestQueue)) {
+    for (const [featureId, featureRequest] of Object.entries(
+      this.queueRequest
+    )) {
       if (featureId === id) {
-        featureRequest.onComplete(value);
-        delete this.featureRequestQueue[featureId];
+        for (const req of featureRequest) {
+          req.onComplete(value);
+        }
       }
     }
   }

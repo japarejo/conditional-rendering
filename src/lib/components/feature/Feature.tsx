@@ -80,7 +80,7 @@ export function Feature({ flags, value, children, expectedValue }: FeaturePropsW
     expectedValue: expectedValue??true
   });
 
-  return <>{feature.feature}</>;
+  return <>{feature}</>;
 
   // return <Suspense fallback={loading}>{feature.feature}</Suspense>;
 

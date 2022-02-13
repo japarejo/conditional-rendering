@@ -24,9 +24,11 @@ export interface ExpectedValueFeatureHookOptions
   expectedValue: FeatureValue;
 }
 
-export interface FeatureResponse {
-  feature: JSX.Element;
-}
+// export interface FeatureResponse {
+//   feature: JSX.Element;
+// }
+
+export type FeatureResponse = JSX.Element;
 
 export default function useNonBooleanFeature(
   options: ExpectedValueFeatureHookOptions
@@ -94,7 +96,8 @@ export default function useNonBooleanFeature(
     }
   }
 
-  return {
-    feature: <>{returnedComponent}</>,
-  };
+  return  <>{returnedComponent}</>;
+  // return {
+  //   feature: <>{returnedComponent}</>,
+  // };
 }

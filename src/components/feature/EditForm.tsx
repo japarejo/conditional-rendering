@@ -24,8 +24,10 @@ const petSchema = Yup.object().shape({
 export default function EditForm({ pet }: { pet?: Pet }) {
   const toast = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
+  // TODO: THIS DOESN'T WORK. How do we do this while keeping it DRY?
   const editFeature = useFeature({
-    id: "pet-edit"
+    id: "pet-edit",
+    on: true
   });
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
         category: pet?.category?.id.toString(),
       }}
       validationSchema={petSchema}
-      onSubmit={(values, { setSubmitting, resetForm }) => {
+      onSubmit={(values, { setSubmitting }) => {
         setSubmitting(true);
         const cat = categories.find((x) => x.id === parseInt(values.category!));
         (values.id ? axios.put : axios.post)("http://localhost:8080/pet", {
@@ -82,7 +84,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
             <FormControl variant="filled">
               <FormLabel>Name</FormLabel>
               <Input
-                disabled={!editFeature.enabled}
+                disabled={!editFeature}
                 bg="white"
                 name="name"
                 value={values.name}
@@ -97,7 +99,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
               <FormLabel>Quantity</FormLabel>
               <Input
                 name="quantity"
-                disabled={!editFeature.enabled}
+                disabled={!editFeature}
                 bg="white"
                 type="number"
                 value={values.quantity}
@@ -111,7 +113,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
             <FormControl>
               <FormLabel>Category</FormLabel>
               <Select
-                disabled={!editFeature.enabled}
+                disabled={!editFeature}
                 bg="white"
                 name="category"
                 value={values.category}
