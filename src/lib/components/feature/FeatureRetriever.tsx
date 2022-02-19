@@ -1,5 +1,7 @@
 import axios from "axios";
-import { FeatureValue } from "./useNonBooleanFeature";
+
+export type AttributeValue = number | string; 
+export type FeatureValue = boolean | AttributeValue;
 
 type OnCompleteCallback = (result: FeatureValue) => void;
 type OnErrorCallback = () => void;
@@ -58,25 +60,80 @@ export default class FeatureRetriever {
       });
   }
 
+  isBoolean(value: any): value is boolean {
+    return typeof value === "boolean";
+  }
+
+  isAttribute(value: any): value is AttributeValue {
+    return typeof value === "string" || typeof value === "number";
+  }
+
   /**
-   * Gets the value of a feature or features. A feature is considered "ON"
+   * Gets the value of a boolean feature
+   * @param id Id of the feature
+   * @returns 
+   */
+  getFeature(id: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      if (id in this.featureMap) {
+        // Check if boolean
+        const value = this.featureMap[id];
+        this.tryResolveFeatureValue(value, resolve, false);
+      } else {
+        this.addFeatureToQueue(id, (v) => {
+          this.tryResolveFeatureValue(v, resolve, false);
+        }, reject);
+      }
+    });
+  }
+
+  // If we passed an object we could get better type safety
+  private tryResolveFeatureValue(value: any, resolve: (x:any) => void, shouldBeAttribute: boolean)
+  {
+    if (shouldBeAttribute) {
+      if (this.isAttribute(value)) {
+        resolve(value as AttributeValue);
+      }
+      else {
+        console.error("Feature is not an attribute", value);
+      }
+    } else {
+      if (this.isBoolean(value)) {
+        resolve(value as boolean);
+      } else {
+        console.error("Feature is not boolean", value);
+      }
+    }
+  }
+
+  getAttribute(id: string): Promise<AttributeValue> {
+    return new Promise((resolve, reject) => {
+      if (id in this.featureMap) {
+        // Check if boolean
+        const value = this.featureMap[id];
+        this.tryResolveFeatureValue(value, resolve, true);
+      } else {
+        this.addFeatureToQueue(id, (v) => {
+          this.tryResolveFeatureValue(v, resolve, true);
+        }, reject);
+      }
+    });
+  }
+
+  /**
+   * Gets the value of a feature or features. ATM A feature is considered "ON"
    * if all the features in the list are true
    * @param ids A list of ids
    * @returns A promise that resolves with the feature boolean value
    */
-  getFeature(ids: string[]): Promise<FeatureValue> {
+  evalFeatureExpression(ids: string[]): Promise<FeatureValue> {
     // console.log("Requested feature", ids);
     return new Promise(async (resolve, reject) => {
       // Iterate through ids, get every individual feature
       Promise.all(
-        ids.map((id) => {
-          // Check if already exists in featuremap
-          if (id in this.featureMap) {
-            return Promise.resolve(this.featureMap[id]);
-          }
-          return new Promise((res, rej) => {
-            this.addFeatureToQueue(id, res, rej);
-          });
+        ids.map((id) =>
+        {
+          return this.getFeature(id);
         })
       )
         .then((values) => {

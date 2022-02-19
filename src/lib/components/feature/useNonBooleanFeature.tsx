@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FeatureContext } from "./FeatureContext";
+import { FeatureValue } from "./FeatureRetriever";
 
-export type FeatureValue = boolean | number | string;
 
 export interface BooleanFeatureHookOptions {
   id?: string;
@@ -52,7 +52,7 @@ export default function useNonBooleanFeature(
       }
       // Get the flag value
       featureRetriever
-        .getFeature(idArray)
+        .evalFeatureExpression(idArray)
         .then((v) => {
           setValue(v);
           setIsLoading(false);

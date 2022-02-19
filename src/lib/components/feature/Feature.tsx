@@ -1,5 +1,6 @@
-import React, { Suspense } from "react";
-import useNonBooleanFeature, { FeatureValue } from "./useNonBooleanFeature";
+import React from "react";
+import { FeatureValue } from "./FeatureRetriever";
+import useNonBooleanFeature from "./useNonBooleanFeature";
 
 type FeatureProps =
   | {
