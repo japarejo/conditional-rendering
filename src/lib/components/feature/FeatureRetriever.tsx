@@ -1,4 +1,7 @@
 import axios from "axios";
+import { attribute } from "lib/logic/model/Attribute";
+import { feature } from "lib/logic/model/Feature";
+import NAryFunction from "lib/logic/model/NAryFunction";
 
 export type AttributeValue = number | string; 
 export type FeatureValue = boolean | AttributeValue;
@@ -223,5 +226,23 @@ export default class FeatureRetriever {
         }
       }
     }
+  }
+
+  /**
+   * Returns a NAryFunction. Useful to operate on.
+   * @param id 
+   * @returns A NAryFunction that resolves to a boolean feature
+   */
+  getLogicFeature(id: string): NAryFunction<boolean> {
+    return feature(id, this);
+  }
+
+  /**
+   * Returns a NAryFunction. Useful to operate on.
+   * @param id 
+   * @returns A NAryFunction that resolves to an attribute value.
+   */
+  getLogicAttribute(id: string): NAryFunction<AttributeValue> {
+    return attribute(id, this);
   }
 }
