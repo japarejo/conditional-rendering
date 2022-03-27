@@ -9,7 +9,14 @@ import reportWebVitals from "./reportWebVitals";
 
 ReactDOM.render(
   <React.StrictMode>
-    <FeatureContext.Provider value={new FeatureRetriever()}>
+    <FeatureContext.Provider
+      value={{
+        // featureRetrievers: {
+        //   ...makeFeatureAttributeRetrievers(new FeatureRetriever()),
+        // },
+        featureRetriever: new FeatureRetriever(),
+      }}
+    >
       <ChakraProvider>
         <App />
       </ChakraProvider>

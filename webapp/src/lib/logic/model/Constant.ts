@@ -1,4 +1,4 @@
-import NAryFunction from "./NAryFunction";
+import { NAryFunction } from "./NAryFunction";
 import { ResultValue, value } from "./ResultValue";
 
 export class Constant<T> implements NAryFunction<T> {

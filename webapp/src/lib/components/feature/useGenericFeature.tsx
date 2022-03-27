@@ -1,0 +1,84 @@
+import { NAryFunction } from "lib/logic/model/NAryFunction";
+import React, { useContext, useEffect, useState } from "react";
+import { FeatureContext } from "./FeatureContext";
+
+export interface GenericFeatureHookOptions {
+  on: { expression: NAryFunction<boolean>; on: React.ReactNode }[];
+  default?: React.ReactNode;
+  loading?: React.ReactNode;
+  error?: React.ReactNode;
+}
+
+export type FeatureResponse = JSX.Element;
+
+export default function useGenericFeature(
+  options: GenericFeatureHookOptions
+): FeatureResponse {
+  const { featureRetriever } = useContext(FeatureContext);
+  const [errored, setErrored] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  // Index of the feature that was evaluated to true
+  const [value, setValue] = useState<number | undefined>();
+
+  if (!options.on) {
+    throw new Error("On Expression list must be provided");
+  }
+
+
+  useEffect(() => {
+    console.log("useefect");
+    if (options.on) {
+      setIsLoading(true);
+      // Get the feature value for each provided expression
+      const expressionPromises = options.on.map((on) =>
+        on.expression.eval({ featureRetriever })
+      );
+
+      if (expressionPromises.length === 0) {
+        setIsLoading(false);
+        setValue(undefined);
+        return;
+      }
+
+      // Wait for all the promises to resolve
+      Promise.all(expressionPromises).then((values) => {
+        // Log any of them that might be in error
+        values.forEach((value) => {
+          if (value.isError) {
+            console.warn("Error evaluating feature", value.errorMessage);
+          }
+        });
+
+        // Find the first expression that's true, and set the value to its index
+        const index = values.findIndex((value) => value.value === true);
+        if (index !== -1) {
+          setValue(index);
+        } else {
+          // Since none of them are true, set the value to undefined since we'll be in the default value
+          setValue(undefined);
+        }
+        setIsLoading(false);
+      });
+    } else {
+      setErrored(true);
+      setIsLoading(false);
+    }
+  }, [featureRetriever, options.on]);
+
+  let returnedComponent: React.ReactNode;
+  if (errored) {
+    returnedComponent = options.error ?? <></>;
+  } else if (isLoading) {
+    returnedComponent = options.loading ?? <></>;
+  } else {
+    // If we have a value, return the on expression at that index
+    if (value !== undefined) {
+      returnedComponent = options.on[value].on ?? <></>;
+    } else {
+      // Otherwise, return the default value
+      returnedComponent = options.default ?? <></>;
+    }
+  }
+
+  return <>{returnedComponent}</>;
+}

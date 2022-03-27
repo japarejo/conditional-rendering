@@ -1,4 +1,5 @@
-import useFeature from "lib/components/feature/useFeature";
+import useGenericFeature from "lib/components/feature/useGenericFeature";
+import { feature } from "lib/logic/model/Feature";
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Main from "routes/main";
@@ -9,13 +10,26 @@ import "./App.css";
 
 function App() {
   document.title = "Featurized Pet Shop";
-  const readRoute = useFeature({
-    id: "pet-read",
-    on: <Route path="pet/:petId" element={<PetEdit />} />
+
+  
+  // TODO Infinite loop here because
+  // we pass a new ON object every time
+  const readRoute = useGenericFeature({
+    on: [
+      {
+        expression: feature("pet-read"),
+        on: <Route path="pet/:petId" element={<PetEdit />} />,
+      },
+    ]
   });
-  const addRoute = useFeature({
-    id: "pet-add",
-    on: <Route path="pet" element={<PetEdit />} />
+
+  const addRoute = useGenericFeature({
+    on: [
+      {
+        expression: feature("pet-add"),
+        on: <Route path="pet" element={<PetEdit />} />,
+      },
+    ]
   });
   
   return (

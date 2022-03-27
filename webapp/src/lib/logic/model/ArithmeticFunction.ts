@@ -1,4 +1,4 @@
-import NAryFunction from "./NAryFunction";
+import { NAryFunction, NAryFunctionOptions } from "./NAryFunction";
 import { error, ResultValue, value } from "./ResultValue";
 
 export enum ArithmeticOperator {
@@ -17,9 +17,9 @@ class ArithmeticFunction implements NAryFunction<number> {
         this.op = operator;
     }
 
-    async eval(): Promise<ResultValue<number>> {
-        const lEval = await this.left.eval();
-        const rEval = await this.right.eval();
+    async eval(options?: NAryFunctionOptions): Promise<ResultValue<number>> {
+        const lEval = await this.left.eval(options);
+        const rEval = await this.right.eval(options);
         if (lEval.isError || rEval.isError) {
             return error("Error evaluating Arithmetic Expression: " + lEval.errorMessage + " " + rEval.errorMessage);
         }

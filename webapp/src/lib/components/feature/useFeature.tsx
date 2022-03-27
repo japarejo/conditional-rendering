@@ -1,10 +1,10 @@
-import useNonBooleanFeature, { BooleanFeatureHookOptions, FeatureResponse } from "./useNonBooleanFeature";
+// import useGenericFeature, { BooleanFeatureHookOptions, FeatureResponse } from "./useGenericFeature";
+export {}
 
-
-export default function useFeature(options: BooleanFeatureHookOptions): FeatureResponse {
+// export default function useFeature(options: BooleanFeatureHookOptions): FeatureResponse {
  
-  return useNonBooleanFeature({
-    ...options,
-    expectedValue: true
-  });
-}
+//   return useGenericFeature({
+//     ...options,
+//     expectedValue: true
+//   });
+// }

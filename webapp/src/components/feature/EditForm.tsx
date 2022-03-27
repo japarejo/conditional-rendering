@@ -1,17 +1,18 @@
-import
-  {
-    Button,
-    FormControl, FormLabel,
-    Input, Select,
-    Text,
-    useToast,
-    VStack
-  } from "@chakra-ui/react";
+import {
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  Select,
+  Text,
+  useToast,
+  VStack,
+} from "@chakra-ui/react";
 import { Category, Pet } from "api/Pet";
 import axios from "axios";
 import { Form, Formik } from "formik";
 import { Feature, On } from "lib/components/feature/Feature";
-import useFeature from "lib/components/feature/useFeature";
+import { feature } from "lib/logic/model/Feature";
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
 
@@ -21,14 +22,9 @@ const petSchema = Yup.object().shape({
   category: Yup.number().required("Category is required"),
 });
 
-export default function EditForm({ pet }: { pet?: Pet }) {
+export default function EditForm({ pet, readOnly }: { pet?: Pet, readOnly?: boolean }) {
   const toast = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
-  // TODO: THIS DOESN'T WORK. How do we do this while keeping it DRY?
-  const editFeature = useFeature({
-    id: "pet-edit",
-    on: true
-  });
 
   useEffect(() => {
     axios
@@ -84,7 +80,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
             <FormControl variant="filled">
               <FormLabel>Name</FormLabel>
               <Input
-                disabled={!editFeature}
+                disabled={readOnly}
                 bg="white"
                 name="name"
                 value={values.name}
@@ -99,7 +95,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
               <FormLabel>Quantity</FormLabel>
               <Input
                 name="quantity"
-                disabled={!editFeature}
+                disabled={readOnly}
                 bg="white"
                 type="number"
                 value={values.quantity}
@@ -113,7 +109,7 @@ export default function EditForm({ pet }: { pet?: Pet }) {
             <FormControl>
               <FormLabel>Category</FormLabel>
               <Select
-                disabled={!editFeature}
+                disabled={readOnly}
                 bg="white"
                 name="category"
                 value={values.category}
@@ -130,8 +126,8 @@ export default function EditForm({ pet }: { pet?: Pet }) {
                 {errors.category}
               </Text>
             </FormControl>
-            <Feature flags="pet-edit">
-              <On>
+            <Feature>
+              <On expression={feature("pet-edit")}>
                 <Button
                   colorScheme="blue"
                   w="100%"

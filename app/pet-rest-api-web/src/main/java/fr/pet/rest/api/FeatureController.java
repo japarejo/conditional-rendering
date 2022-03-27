@@ -23,6 +23,9 @@ public class FeatureController {
         featureMap.put("pet-edit", new Feature(false));
         featureMap.put("pet-add", new Feature(false));
         featureMap.put("pet-delete", new Feature(false));
+        featureMap.put("pet-requests-remaining", new Feature(5));
+        featureMap.put("pet-allowed-types", new Feature("dog cat bird snake"));
+
     }
 
     @CrossOrigin

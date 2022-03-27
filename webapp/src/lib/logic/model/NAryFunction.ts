@@ -1,5 +1,11 @@
+import FeatureRetriever from "lib/components/feature/FeatureRetriever";
 import { ResultValue } from "./ResultValue";
 
-export default interface NAryFunction<T> {
-    eval: () => Promise<ResultValue<T>>;
+export interface NAryFunctionOptions {
+    featureRetriever?: FeatureRetriever;
+}
+
+export interface NAryFunction<T>
+{
+    eval: (options?: NAryFunctionOptions) => Promise<ResultValue<T>>;
 }

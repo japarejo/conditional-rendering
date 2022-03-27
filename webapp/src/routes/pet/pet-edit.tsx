@@ -2,7 +2,9 @@ import { Box, Spinner, useToast, VStack } from "@chakra-ui/react";
 import { Pet } from "api/Pet";
 import axios from "axios";
 import EditForm from "components/feature/EditForm";
-import useFeature from "lib/components/feature/useFeature";
+import useGenericFeature from "lib/components/feature/useGenericFeature";
+import { or } from "lib/logic/model/BinaryLogicalPredicate";
+import { feature } from "lib/logic/model/Feature";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -12,12 +14,20 @@ export default function PetEdit() {
   const [loading, setLoading] = useState(Boolean(params.petId));
   const [error, setError] = useState<string | undefined>(undefined);
   const toast = useToast();
-  const readFeature = useFeature({
-    id: "pet-read"
-  });
-  const addFeature = useFeature({
-    id: "pet-add"
-  });
+
+  const readAddFeature = useGenericFeature({
+    on: [
+      {
+        expression: feature("pet-add"),
+        on: <EditForm pet={pet} />
+      },
+      {
+        expression: feature("pet-add"),
+        on: <EditForm pet={pet} readOnly />
+      },
+    ],
+    default: "You're not authorized to use this feature"
+  })
 
   useEffect(() => {
     if (params.petId) {
@@ -47,9 +57,7 @@ export default function PetEdit() {
   return (
     <VStack px="20px">
       <Box maxW="400px" w="100%">
-          {(readFeature || addFeature) ? (
-            <EditForm pet={pet} />
-          ) : "You're not authorized to use this feature"}
+          {readAddFeature}
       </Box>
     </VStack>
   );

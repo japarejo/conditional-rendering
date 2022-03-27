@@ -1,4 +1,4 @@
-import NAryFunction from "./NAryFunction";
+import { NAryFunction, NAryFunctionOptions } from "./NAryFunction";
 import { error, ResultValue, value } from "./ResultValue";
 
 export enum BinaryLogicalOperator {
@@ -17,9 +17,9 @@ class BinaryLogicalPredicate implements NAryFunction<boolean> {
         this.op = operator;
     }
 
-    async eval(): Promise<ResultValue<boolean>> {
-        const lEval = await this.left.eval();
-        const rEval = await this.right.eval();
+    async eval(options?: NAryFunctionOptions): Promise<ResultValue<boolean>> {
+        const lEval = await this.left.eval(options);
+        const rEval = await this.right.eval(options);
         if (lEval.isError || rEval.isError) {
             return error("Error evaluating Boolean Expression: " + lEval.errorMessage + " " + rEval.errorMessage);
         }

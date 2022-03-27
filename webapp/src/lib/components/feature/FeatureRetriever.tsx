@@ -1,7 +1,7 @@
 import axios from "axios";
 import { attribute } from "lib/logic/model/Attribute";
 import { feature } from "lib/logic/model/Feature";
-import NAryFunction from "lib/logic/model/NAryFunction";
+import { NAryFunction } from "lib/logic/model/NAryFunction";
 
 export type AttributeValue = number | string; 
 export type FeatureValue = boolean | AttributeValue;
@@ -41,8 +41,8 @@ export default class FeatureRetriever {
     this.queueMain = {};
 
     const ids = Object.keys(this.queueRequest);
-    // TODO non boolean feature
-    this.AXIOS_INSTANCE.post<Record<string, boolean>>(`/feature`, ids)
+
+    this.AXIOS_INSTANCE.post<Record<string, FeatureValue>>(`/feature`, ids)
       .then((response) => {
         this.processFeatureResponse(response.data);
         // Once we're done, set a new timeout.
@@ -77,6 +77,7 @@ export default class FeatureRetriever {
    * @returns 
    */
   getFeature(id: string): Promise<boolean> {
+    console.log("getting feature", id);
     return new Promise((resolve, reject) => {
       if (id in this.featureMap) {
         // Check if boolean
@@ -188,7 +189,7 @@ export default class FeatureRetriever {
    * Processes the map of features that came from the server
    * @param retrievedFeatures Dictionary of retrieved features
    */
-  processFeatureResponse(retrievedFeatures: Record<string, boolean>) {
+  processFeatureResponse(retrievedFeatures: Record<string, FeatureValue>) {
     console.log("received features", retrievedFeatures);
     for (const featureId of Object.keys(retrievedFeatures)) {
       // Call relevant callbacks

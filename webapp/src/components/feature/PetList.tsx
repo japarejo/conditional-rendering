@@ -13,27 +13,51 @@ import { Pet } from "api/Pet";
 import { PetRequest } from "api/PetRequest";
 import axios from "axios";
 import LinkButton from "components/common/LinkButton";
-import { Feature, On } from "lib/components/feature/Feature";
-import useFeature from "lib/components/feature/useFeature";
+import { Default, Feature, On } from "lib/components/feature/Feature";
+import useGenericFeature from "lib/components/feature/useGenericFeature";
+import { feature } from "lib/logic/model/Feature";
 import { useEffect, useState } from "react";
 import DeleteButton from "./DeleteButton";
 
 export default function PetList() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
-  //   const [currentPage, setCurrentPage] = useState(0);
   const [resetCounter, setResetCounter] = useState(0);
-  const readFeature = useFeature({
-    id: "pet-read",
-    on: <Th>Edit</Th>,
-  });
-  const editFeature = useFeature({
-    id: "pet-edit",
-    on: "Edit",
-    off: "View",
+
+  const editHeader = useGenericFeature({
+    on: [
+      {
+        expression: feature("pet-read"),
+        on: <Th>Edit</Th>,
+      },
+    ],
   });
 
-  // TODO: Think about how to pass props to feature...
+  const buttonText = useGenericFeature({
+    on: [
+      {
+        expression: feature("pet-edit"),
+        on: "Edit",
+      },
+    ],
+    default: "View",
+  });
+
+  // !!! CREATE FEATURE COMPONENT SO WE CAN PASS PROPS
+  // const tableButton = useGenericFeature({
+  //   on: [
+  //     {
+  //       expression: feature("pet-read"),
+  //       on: (
+  //         <Td>
+  //           <LinkButton to={`/pet/${pet.id}`} as={Button} colorScheme="green">
+  //             {buttonText}
+  //           </LinkButton>
+  //         </Td>
+  //       ),
+  //     },
+  //   ],
+  // });
 
   useEffect(() => {
     axios
@@ -55,9 +79,13 @@ export default function PetList() {
             <Th>Name</Th>
             <Th>Quantity</Th>
             <Th>Category</Th>
-            {readFeature}
-            <Feature flags="pet-delete">
-              <On>
+            <Feature>
+              <On expression={feature("pet-read")}>
+                <Th>Edit</Th>
+              </On>
+            </Feature>
+            <Feature>
+              <On expression={feature("pet-delete")}>
                 <Th>Delete</Th>
               </On>
             </Feature>
@@ -70,21 +98,25 @@ export default function PetList() {
               <Td>{pet.name}</Td>
               <Td>{pet.quantity}</Td>
               <Td>{pet.category.name}</Td>
-              <Feature flags="pet-read">
-                <On>
+              <Feature>
+                <On expression={feature("pet-read")}>
                   <Td>
                     <LinkButton
                       to={`/pet/${pet.id}`}
                       as={Button}
                       colorScheme="green"
                     >
-                      {editFeature}
+                      {/* Performance of recursive calls? */}
+                      <Feature>
+                        <On expression={feature("pet-edit")}>Edit</On>
+                        <Default>View</Default>
+                      </Feature>
                     </LinkButton>
                   </Td>
                 </On>
               </Feature>
-              <Feature flags="pet-delete">
-                <On>
+              <Feature>
+                <On expression={feature("pet-delete")}>
                   <Td>
                     <DeleteButton
                       petId={pet.id}

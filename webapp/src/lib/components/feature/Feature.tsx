@@ -1,26 +1,32 @@
-import React from "react";
-import { FeatureValue } from "./FeatureRetriever";
-import useNonBooleanFeature from "./useNonBooleanFeature";
+import { NAryFunction } from "lib/logic/model/NAryFunction";
+import useGenericFeature from "./useGenericFeature";
+import React, { useEffect, useMemo, useState } from "react";
 
-type FeatureProps =
-  | {
-      flags: string | string[];
-      value?: undefined;
-      expectedValue?: FeatureValue
-    }
-  | {
-      flags?: undefined;
-      value: boolean;
-      expectedValue?: undefined
-    };
+// type FeatureProps =
+//   | {
+//       flags: string | string[];
+//       value?: undefined;
+//       expectedValue?: FeatureValue
+//     }
+//   | {
+//       flags?: undefined;
+//       value: boolean;
+//       expectedValue?: undefined
+//     };
 
-type FeaturePropsWithChildren = FeatureProps & { children: React.ReactNode };
+// type FeaturePropsWithChildren = FeatureProps & { children: React.ReactNode };
 
-export function On({ children }: { children: React.ReactNode }) {
+export function On({
+  children,
+  expression,
+}: {
+  children: React.ReactNode;
+  expression: NAryFunction<boolean>;
+}) {
   return <>{children}</>;
 }
 
-export function Off({ children }: { children: React.ReactNode }) {
+export function Default({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
@@ -32,59 +38,63 @@ export function ErrorFallback({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export function Feature({ flags, value, children, expectedValue }: FeaturePropsWithChildren) {
-  // Gets children of Feature.On
-  const onChildren = React.Children.toArray(children).filter((child) => {
-    const c = child as React.ReactElement;
-    return c.type === On;
-  });
+export function Feature({ children }: { children: React.ReactNode }) {
+  const [onChildren, setOnChildren] = useState<React.ReactElement[]>([]);
+  const [defaultChildren, setDefaultChildren] = useState<React.ReactElement[]>(
+    []
+  );
+  const [loadingChildren, setLoadingChildren] = useState<React.ReactElement[]>(
+    []
+  );
+  const [errorChildren, setErrorChildren] = useState<React.ReactElement[]>([]);
 
-  // Gets children of Feature.Off
-  const offChildren = React.Children.toArray(children).filter((child) => {
-    const c = child as React.ReactElement;
-    return c.type === Off;
-  });
+  const onExpressions = useMemo(() => {
+    return onChildren.map((child) => {
+      return {
+        on: child.props.children,
+        expression: child.props.expression,
+      };
+    });
+  }, [onChildren]);
 
-  // Gets children of Feature.Loading
-  const loading = React.Children.toArray(children).filter((child) => {
-    const c = child as React.ReactElement;
-    return c.type === Loading;
-  });
+  useEffect(() => {
+    // Gets children of Feature.On
+    const on = React.Children.toArray(children).filter((child) => {
+      const c = child as React.ReactElement;
+      return c.type === On;
+    }) as React.ReactElement[];
+    setOnChildren(on);
 
-  // Gets children of Feature.Error
-  const error = React.Children.toArray(children).filter((child) => {
-    const c = child as React.ReactElement;
-    return c.type === ErrorFallback;
-  });
+    // Gets children of Feature.Off
+    const def = React.Children.toArray(children).filter((child) => {
+      const c = child as React.ReactElement;
+      return c.type === Default;
+    }) as React.ReactElement[];
+    setDefaultChildren(def);
 
-  let flagObj = {};
-  if (flags) {
-    if (Array.isArray(flags))
-    {
-      flagObj = {
-        ids: flags
-      }
-    } else {
-      flagObj = {
-        id: flags
-      }
-    }
-  }
-  
-  const feature = useNonBooleanFeature({
-    ...flagObj,
-    value,
-    on: onChildren,
-    off: offChildren,
-    loading,
-    error,
-    expectedValue: expectedValue??true
+    // Gets children of Feature.Loading
+    const loading = React.Children.toArray(children).filter((child) => {
+      const c = child as React.ReactElement;
+      return c.type === Loading;
+    }) as React.ReactElement[];
+    setLoadingChildren(loading);
+
+    // Gets children of Feature.Error
+    const err = React.Children.toArray(children).filter((child) => {
+      const c = child as React.ReactElement;
+      return c.type === ErrorFallback;
+    }) as React.ReactElement[];
+    setErrorChildren(err);
+  }, [children]);
+
+  const feature = useGenericFeature({
+    on: onExpressions,
+    default: defaultChildren,
+    loading: loadingChildren,
+    error: errorChildren,
   });
 
   return <>{feature}</>;
 
   // return <Suspense fallback={loading}>{feature.feature}</Suspense>;
-
-  // // TODO: Inject properties into children
-
 }
