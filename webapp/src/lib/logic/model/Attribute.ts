@@ -27,6 +27,13 @@ export class Attribute implements NAryFunction<AttributeValue> {
             return error("Error evaluating Attribute: " + this.attributeId + " Retrieval error");
         }
     }
+
+    equals(other: NAryFunction<any>): boolean {
+        if (other instanceof Attribute) {
+            return this.attributeId === other.attributeId;
+        }
+        return false;
+    }
 }
 
 /**

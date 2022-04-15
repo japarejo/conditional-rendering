@@ -131,7 +131,6 @@ export default class FeatureRetriever {
    * @returns A promise that resolves with the feature boolean value
    */
   evalFeatureExpression(ids: string[]): Promise<FeatureValue> {
-    // console.log("Requested feature", ids);
     return new Promise(async (resolve, reject) => {
       // Iterate through ids, get every individual feature
       Promise.all(

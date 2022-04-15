@@ -1,10 +1,12 @@
 import { Box, HStack, Image } from "@chakra-ui/react";
 import { Feature, On } from "lib/components/feature/Feature";
+import useGenericFeature from "lib/components/feature/useGenericFeature";
 import { feature } from "lib/logic/model/Feature";
 import { Outlet } from "react-router-dom";
 import AppLink from "../components/common/AppLink";
 
 export default function Main() {
+  
   return (
     <>
       <HStack

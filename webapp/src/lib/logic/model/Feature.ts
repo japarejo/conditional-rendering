@@ -27,6 +27,13 @@ export class Feature implements NAryFunction<boolean> {
             return error("Error evaluating Feature: " + this.featureId + " Retrieval error");
         }
     }
+
+    equals(other: NAryFunction<any>): boolean {
+        if (other instanceof Feature) {
+            return this.featureId === other.featureId;
+        }
+        return false;
+    }
 }
 
 /**

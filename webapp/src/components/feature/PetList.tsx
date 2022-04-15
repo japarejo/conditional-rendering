@@ -43,22 +43,6 @@ export default function PetList() {
     default: "View",
   });
 
-  // !!! CREATE FEATURE COMPONENT SO WE CAN PASS PROPS
-  // const tableButton = useGenericFeature({
-  //   on: [
-  //     {
-  //       expression: feature("pet-read"),
-  //       on: (
-  //         <Td>
-  //           <LinkButton to={`/pet/${pet.id}`} as={Button} colorScheme="green">
-  //             {buttonText}
-  //           </LinkButton>
-  //         </Td>
-  //       ),
-  //     },
-  //   ],
-  // });
-
   useEffect(() => {
     axios
       .get<PetRequest<Pet[]>>("http://localhost:8080/pet/list")

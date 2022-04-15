@@ -22,7 +22,7 @@ export default function PetEdit() {
         on: <EditForm pet={pet} />
       },
       {
-        expression: feature("pet-add"),
+        expression: feature("pet-read"),
         on: <EditForm pet={pet} readOnly />
       },
     ],

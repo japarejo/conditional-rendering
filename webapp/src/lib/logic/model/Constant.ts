@@ -11,6 +11,10 @@ export class Constant<T> implements NAryFunction<T> {
     async eval(): Promise<ResultValue<T>> {
         return value(this.value);
     }
+
+    equals(other: NAryFunction<any>): boolean {
+        return other instanceof Constant && this.value === other.value;
+    }
 }
 
 

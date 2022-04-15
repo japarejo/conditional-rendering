@@ -3,6 +3,10 @@ import React, { useContext, useEffect, useState } from "react";
 import { FeatureContext } from "./FeatureContext";
 
 export interface GenericFeatureHookOptions {
+  /**
+   * If you're changing the `on` object, you should update this key so the hook updates with the new values.
+   */
+  key?: string;
   on: { expression: NAryFunction<boolean>; on: React.ReactNode }[];
   default?: React.ReactNode;
   loading?: React.ReactNode;
@@ -24,9 +28,7 @@ export default function useGenericFeature(
     throw new Error("On Expression list must be provided");
   }
 
-
   useEffect(() => {
-    console.log("useefect");
     if (options.on) {
       setIsLoading(true);
       // Get the feature value for each provided expression
@@ -63,7 +65,27 @@ export default function useGenericFeature(
       setErrored(true);
       setIsLoading(false);
     }
-  }, [featureRetriever, options.on]);
+  }, [options.key]);
+
+  // const returnedComponent = useMemo(() => {
+  //   let returnedComponent: React.ReactNode;
+  //   if (errored) {
+  //     returnedComponent = options.error ?? <></>;
+  //   } else if (isLoading) {
+  //     returnedComponent = options.loading ?? <></>;
+  //   } else {
+  //     // If we have a value, return the on expression at that index
+  //     if (value !== undefined) {
+  //       returnedComponent = options.on[value].on ?? <></>;
+  //     } else {
+  //       // Otherwise, return the default value
+  //       returnedComponent = options.default ?? <></>;
+  //     }
+  //   }
+
+  //   // debugger;
+  //   return <>{returnedComponent}</>;
+  // }, [options.on, options.default, options.error, options.loading, value]);
 
   let returnedComponent: React.ReactNode;
   if (errored) {
@@ -80,5 +102,8 @@ export default function useGenericFeature(
     }
   }
 
+  // debugger;
   return <>{returnedComponent}</>;
+
+  // return returnedComponent;
 }

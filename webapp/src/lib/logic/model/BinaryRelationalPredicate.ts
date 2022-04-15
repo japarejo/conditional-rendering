@@ -64,6 +64,13 @@ class BinaryRelationalPredicate implements NAryFunction<boolean> {
         }
         return value(val);
     }
+
+    equals(other: NAryFunction<any>): boolean {
+        if (other instanceof BinaryRelationalPredicate) {
+            return this.left.equals(other.left) && this.right.equals(other.right) && this.op === other.op;
+        }
+        return false;
+    }
 }
 
 export function lt(left: NAryFunction<number>, right: NAryFunction<number>): BinaryRelationalPredicate {

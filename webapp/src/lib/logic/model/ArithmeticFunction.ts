@@ -54,6 +54,13 @@ class ArithmeticFunction implements NAryFunction<number> {
         }
         return value(val);
     }
+
+    equals(other: NAryFunction<any>): boolean {
+        if (other instanceof ArithmeticFunction) {
+            return this.left.equals(other.left) && this.right.equals(other.right) && this.op === other.op;
+        }
+        return false;
+    }
 }
 
 export function plus(left: NAryFunction<number>, right: NAryFunction<number>): ArithmeticFunction {

@@ -8,7 +8,7 @@ export default function Welcome() {
     <>
       <Heading mb="10px">Welcome to Pet Shop</Heading>
       <Text mb="20px">Simple featurized Pet Shop app using ReactJS</Text>
-      {/* <Feature>
+      <Feature>
         <On expression={feature("pet-list")}>
           <PetList />
         </On>
@@ -16,7 +16,7 @@ export default function Welcome() {
           <b>Loading</b>
         </Loading>
         <Default>No puedes ver la lista de mascotas...</Default>
-      </Feature> */}
+      </Feature>
     </>
   );
 }

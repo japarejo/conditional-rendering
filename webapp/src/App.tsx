@@ -11,9 +11,6 @@ import "./App.css";
 function App() {
   document.title = "Featurized Pet Shop";
 
-  
-  // TODO Infinite loop here because
-  // we pass a new ON object every time
   const readRoute = useGenericFeature({
     on: [
       {

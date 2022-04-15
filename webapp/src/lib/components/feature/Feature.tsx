@@ -1,6 +1,7 @@
 import { NAryFunction } from "lib/logic/model/NAryFunction";
 import useGenericFeature from "./useGenericFeature";
 import React, { useEffect, useMemo, useState } from "react";
+import { useWhatChanged } from "@simbathesailor/use-what-changed";
 
 // type FeatureProps =
 //   | {
@@ -39,6 +40,7 @@ export function ErrorFallback({ children }: { children: React.ReactNode }) {
 }
 
 export function Feature({ children }: { children: React.ReactNode }) {
+  const [key, setKey] = useState(0);
   const [onChildren, setOnChildren] = useState<React.ReactElement[]>([]);
   const [defaultChildren, setDefaultChildren] = useState<React.ReactElement[]>(
     []
@@ -58,6 +60,7 @@ export function Feature({ children }: { children: React.ReactNode }) {
   }, [onChildren]);
 
   useEffect(() => {
+    setKey(key+1);
     // Gets children of Feature.On
     const on = React.Children.toArray(children).filter((child) => {
       const c = child as React.ReactElement;
@@ -88,6 +91,7 @@ export function Feature({ children }: { children: React.ReactNode }) {
   }, [children]);
 
   const feature = useGenericFeature({
+    key: key.toString(),
     on: onExpressions,
     default: defaultChildren,
     loading: loadingChildren,

@@ -47,6 +47,13 @@ class BinaryLogicalPredicate implements NAryFunction<boolean> {
         }
         return value(val);
     }
+
+    equals(other: NAryFunction<any>): boolean {
+        if (other instanceof BinaryLogicalPredicate) {
+            return this.left.equals(other.left) && this.right.equals(other.right) && this.op === other.op;
+        }
+        return false;
+    }
 }
 
 export function and(left: NAryFunction<boolean>, right: NAryFunction<boolean>): BinaryLogicalPredicate {

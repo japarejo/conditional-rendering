@@ -8,4 +8,5 @@ export interface NAryFunctionOptions {
 export interface NAryFunction<T>
 {
     eval: (options?: NAryFunctionOptions) => Promise<ResultValue<T>>;
+    equals: (other: NAryFunction<any>) => boolean;
 }
