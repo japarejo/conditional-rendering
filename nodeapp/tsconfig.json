@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "sourceMap": true,
+        "declaration": true,
+        "outDir": "./build",
+        "rootDir": "./src",
+        "lib": [
+            "es2015",
+            "dom"
+        ],
+        "types": [
+            "node"
+        ],
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "esModuleInterop": true
+    },
+    "include": [
+        "src/**/*"
+    ]
+}
