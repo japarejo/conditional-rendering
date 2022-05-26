@@ -32,7 +32,7 @@ export default function PetEdit() {
   useEffect(() => {
     if (params.petId) {
       axios
-        .get<Pet>(`http://localhost:8080/pet/${params.petId}`)
+        .get<Pet>(`/api/pet/${params.petId}`)
         .then((data) => {
           if (!data.data) throw new Error("Pet not found!");
           else setPet(data.data);

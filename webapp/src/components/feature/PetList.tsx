@@ -10,7 +10,6 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Pet } from "api/Pet";
-import { PetRequest } from "api/PetRequest";
 import axios from "axios";
 import LinkButton from "components/common/LinkButton";
 import { Default, Feature, On } from "lib/components/feature/Feature";
@@ -50,9 +49,9 @@ export default function PetList() {
 
   useEffect(() => {
     axios
-      .get<PetRequest<Pet[]>>("http://localhost:8080/pet/list")
+      .get<Pet[]>("/api/pet/list")
       .then((data) => {
-        setPets(data.data.content);
+        setPets(data.data);
         setLoading(false);
       });
   }, [resetCounter]);

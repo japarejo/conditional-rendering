@@ -20,9 +20,9 @@ public class FeatureController {
     public FeatureController() {
         featureMap.put("pet-list", new Feature(true));
         featureMap.put("pet-read", new Feature(true));
-        featureMap.put("pet-edit", new Feature(false));
+        featureMap.put("pet-edit", new Feature(true));
         featureMap.put("pet-add", new Feature(false));
-        featureMap.put("pet-delete", new Feature(false));
+        featureMap.put("pet-delete", new Feature(true));
         featureMap.put("pet-requests-remaining", new Feature(5));
         featureMap.put("pet-allowed-types", new Feature("dog cat bird snake"));
 

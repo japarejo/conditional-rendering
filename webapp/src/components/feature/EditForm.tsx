@@ -28,7 +28,7 @@ export default function EditForm({ pet, readOnly }: { pet?: Pet, readOnly?: bool
 
   useEffect(() => {
     axios
-      .get<Category[]>("http://localhost:8080/category/list")
+      .get<Category[]>("/api/pet/category/list")
       .then((data) => {
         setCategories(data.data);
       });
@@ -46,7 +46,7 @@ export default function EditForm({ pet, readOnly }: { pet?: Pet, readOnly?: bool
       onSubmit={(values, { setSubmitting }) => {
         setSubmitting(true);
         const cat = categories.find((x) => x.id === parseInt(values.category!));
-        (values.id ? axios.put : axios.post)("http://localhost:8080/pet", {
+        (values.id ? axios.put : axios.post)("/api/pet/", {
           ...values,
           category: cat,
         })

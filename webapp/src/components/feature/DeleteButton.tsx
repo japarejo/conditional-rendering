@@ -8,7 +8,7 @@ export default function DeleteButton({petId, onDeleted} : {petId: string, onDele
     const toast = useToast();
     function onDeletePet() {
         setLoading(true);
-        axios.delete(`http://localhost:8080/pet/${petId}`)
+        axios.delete(`/api/pet/${petId}`)
         .then(() => {
             toast({
                 title: "Success",

@@ -12,7 +12,7 @@ ReactDOM.render(
     <FeatureContext.Provider
       value={{
         featureRetriever: new FeatureRetriever({
-          baseUrl: "http://localhost:4000",
+          baseUrl: "/api",
         }),
       }}
     >
