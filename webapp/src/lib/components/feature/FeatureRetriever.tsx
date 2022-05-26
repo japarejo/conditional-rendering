@@ -1,9 +1,9 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { attribute } from "lib/logic/model/Attribute";
 import { feature } from "lib/logic/model/Feature";
 import { NAryFunction } from "lib/logic/model/NAryFunction";
 
-export type AttributeValue = number | string; 
+export type AttributeValue = number | string;
 export type FeatureValue = boolean | AttributeValue;
 
 type OnCompleteCallback = (result: FeatureValue) => void;
@@ -14,14 +14,26 @@ interface FeatureRequest {
   onError: OnErrorCallback;
 }
 
+interface FeatureRetrieverConfig {
+  windowDelay: number;
+  requestTimeout: number;
+  /**
+   * With a trailing slash
+   */
+  baseUrl: string;
+}
+
+type FeatureRetrieverConstructorConfig = Partial<FeatureRetrieverConfig> & {
+  baseUrl: string;
+};
+
 export default class FeatureRetriever {
   // request window delay in ms
-  WINDOW_DELAY = 1000;
-  REQUEST_TIMEOUT = 5000;
-  AXIOS_INSTANCE = axios.create({
-    baseURL: "http://localhost:8080/",
-    timeout: this.REQUEST_TIMEOUT,
-  });
+  DEFAULT_WINDOW_DELAY = 1000;
+  DEFAULT_REQUEST_TIMEOUT = 5000;
+
+  config: FeatureRetrieverConfig;
+  axiosInstance: AxiosInstance;
 
   queueMain: Record<string, FeatureRequest[]> = {};
   queueRequest: Record<string, FeatureRequest[]> = {};
@@ -29,6 +41,18 @@ export default class FeatureRetriever {
   featureMap: Record<string, FeatureValue> = {};
 
   tickTimeout?: NodeJS.Timeout;
+
+  constructor(config: FeatureRetrieverConstructorConfig) {
+    this.config = {
+      windowDelay: config.windowDelay || this.DEFAULT_WINDOW_DELAY,
+      requestTimeout: config.requestTimeout || this.DEFAULT_REQUEST_TIMEOUT,
+      baseUrl: config.baseUrl,
+    };
+    this.axiosInstance = axios.create({
+      baseURL: this.config.baseUrl,
+      timeout: this.config.requestTimeout,
+    });
+  }
 
   tickRequestQueue() {
     console.log("Ticking...", this.queueMain);
@@ -42,11 +66,15 @@ export default class FeatureRetriever {
 
     const ids = Object.keys(this.queueRequest);
 
-    this.AXIOS_INSTANCE.post<Record<string, FeatureValue>>(`/feature`, ids)
+    this.axiosInstance
+      .post<Record<string, FeatureValue>>(`/feature`, ids)
       .then((response) => {
         this.processFeatureResponse(response.data);
         // Once we're done, set a new timeout.
-        this.tickTimeout = setTimeout(() => this.tickRequestQueue(), this.WINDOW_DELAY);
+        this.tickTimeout = setTimeout(
+          () => this.tickRequestQueue(),
+          this.config.windowDelay
+        );
       })
       .catch((error) => {
         console.error(error);
@@ -74,7 +102,7 @@ export default class FeatureRetriever {
   /**
    * Gets the value of a boolean feature
    * @param id Id of the feature
-   * @returns 
+   * @returns
    */
   getFeature(id: string): Promise<boolean> {
     console.log("getting feature", id);
@@ -84,21 +112,27 @@ export default class FeatureRetriever {
         const value = this.featureMap[id];
         this.tryResolveFeatureValue(value, resolve, false);
       } else {
-        this.addFeatureToQueue(id, (v) => {
-          this.tryResolveFeatureValue(v, resolve, false);
-        }, reject);
+        this.addFeatureToQueue(
+          id,
+          (v) => {
+            this.tryResolveFeatureValue(v, resolve, false);
+          },
+          reject
+        );
       }
     });
   }
 
   // If we passed an object we could get better type safety
-  private tryResolveFeatureValue(value: any, resolve: (x:any) => void, shouldBeAttribute: boolean)
-  {
+  private tryResolveFeatureValue(
+    value: any,
+    resolve: (x: any) => void,
+    shouldBeAttribute: boolean
+  ) {
     if (shouldBeAttribute) {
       if (this.isAttribute(value)) {
         resolve(value as AttributeValue);
-      }
-      else {
+      } else {
         console.error("Feature is not an attribute", value);
       }
     } else {
@@ -117,9 +151,13 @@ export default class FeatureRetriever {
         const value = this.featureMap[id];
         this.tryResolveFeatureValue(value, resolve, true);
       } else {
-        this.addFeatureToQueue(id, (v) => {
-          this.tryResolveFeatureValue(v, resolve, true);
-        }, reject);
+        this.addFeatureToQueue(
+          id,
+          (v) => {
+            this.tryResolveFeatureValue(v, resolve, true);
+          },
+          reject
+        );
       }
     });
   }
@@ -134,8 +172,7 @@ export default class FeatureRetriever {
     return new Promise(async (resolve, reject) => {
       // Iterate through ids, get every individual feature
       Promise.all(
-        ids.map((id) =>
-        {
+        ids.map((id) => {
           return this.getFeature(id);
         })
       )
@@ -168,7 +205,7 @@ export default class FeatureRetriever {
       // if the tick interval
       this.tickTimeout = setTimeout(
         () => this.tickRequestQueue(),
-        this.WINDOW_DELAY
+        this.config.windowDelay
       );
     }
 
@@ -230,7 +267,7 @@ export default class FeatureRetriever {
 
   /**
    * Returns a NAryFunction. Useful to operate on.
-   * @param id 
+   * @param id
    * @returns A NAryFunction that resolves to a boolean feature
    */
   getLogicFeature(id: string): NAryFunction<boolean> {
@@ -239,7 +276,7 @@ export default class FeatureRetriever {
 
   /**
    * Returns a NAryFunction. Useful to operate on.
-   * @param id 
+   * @param id
    * @returns A NAryFunction that resolves to an attribute value.
    */
   getLogicAttribute(id: string): NAryFunction<AttributeValue> {

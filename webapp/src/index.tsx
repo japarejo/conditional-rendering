@@ -11,10 +11,9 @@ ReactDOM.render(
   <React.StrictMode>
     <FeatureContext.Provider
       value={{
-        // featureRetrievers: {
-        //   ...makeFeatureAttributeRetrievers(new FeatureRetriever()),
-        // },
-        featureRetriever: new FeatureRetriever(),
+        featureRetriever: new FeatureRetriever({
+          baseUrl: "http://localhost:4000",
+        }),
       }}
     >
       <ChakraProvider>
