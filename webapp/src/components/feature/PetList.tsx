@@ -15,6 +15,11 @@ import axios from "axios";
 import LinkButton from "components/common/LinkButton";
 import { Default, Feature, On } from "lib/components/feature/Feature";
 import useGenericFeature from "lib/components/feature/useGenericFeature";
+import { plus } from "lib/logic/model/ArithmeticFunction";
+import { attribute } from "lib/logic/model/Attribute";
+import { and, or } from "lib/logic/model/BinaryLogicalPredicate";
+import { gte } from "lib/logic/model/BinaryRelationalPredicate";
+import constant from "lib/logic/model/Constant";
 import { feature } from "lib/logic/model/Feature";
 import { useEffect, useState } from "react";
 import DeleteButton from "./DeleteButton";
@@ -64,7 +69,7 @@ export default function PetList() {
             <Th>Quantity</Th>
             <Th>Category</Th>
             <Feature>
-              <On expression={feature("pet-read")}>
+              <On expression={and(feature("pet-read"), feature("pet-edit"))}>
                 <Th>Edit</Th>
               </On>
             </Feature>
@@ -83,7 +88,7 @@ export default function PetList() {
               <Td>{pet.quantity}</Td>
               <Td>{pet.category.name}</Td>
               <Feature>
-                <On expression={feature("pet-read")}>
+                <On expression={and(feature("pet-read"), feature("pet-edit"))}>
                   <Td>
                     <LinkButton
                       to={`/pet/${pet.id}`}
@@ -92,6 +97,9 @@ export default function PetList() {
                     >
                       {/* Performance of recursive calls? */}
                       <Feature>
+                        <On expression={gte(plus(3, 1), 5)}>
+                          Edit
+                        </On>
                         <On expression={feature("pet-edit")}>Edit</On>
                         <Default>View</Default>
                       </Feature>
