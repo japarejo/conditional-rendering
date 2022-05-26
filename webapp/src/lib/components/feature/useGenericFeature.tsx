@@ -50,6 +50,12 @@ export default function useGenericFeature(
             console.warn("Error evaluating feature", value.errorMessage);
           }
         });
+        const isErrored = values.some((value) => value.isError);
+        if (isErrored) {
+          setErrored(true);
+          setIsLoading(false);
+          return;
+        }
 
         // Find the first expression that's true, and set the value to its index
         const index = values.findIndex((value) => value.value === true);

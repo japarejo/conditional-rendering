@@ -1,6 +1,6 @@
 import { Heading, Text } from "@chakra-ui/react";
 import PetList from "components/feature/PetList";
-import { Default, Feature, Loading, On } from "lib/components/feature/Feature";
+import { Default, ErrorFallback, Feature, Loading, On, } from "lib/components/feature/Feature";
 import { feature } from "lib/logic/model/Feature";
 
 export default function Welcome() {
@@ -15,6 +15,7 @@ export default function Welcome() {
         <Loading>
           <b>Loading</b>
         </Loading>
+        <ErrorFallback>Error recuperando la feature pet-list</ErrorFallback>
         <Default>No puedes ver la lista de mascotas...</Default>
       </Feature>
     </>
