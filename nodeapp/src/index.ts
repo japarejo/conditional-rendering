@@ -2,6 +2,7 @@
 // Code below
 import express from "express";
 import PetController from "./PetController";
+import cors from "cors";
 
 const app = express();
 
@@ -37,6 +38,10 @@ app.post("/api/feature", async (req, res) => {
 });
 
 app.use('/api/pet', PetController);
+
+app.use(cors({
+  origin: "http://localhost:3000"
+}))
 
 app.listen(4000, () => {
   console.log("Example app listening on port 4000!");
