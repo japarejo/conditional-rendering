@@ -34,6 +34,7 @@ app.post("/api/feature", async (req, res) => {
     console.log(feature);
     result[feature] = FEATURE_MAP[feature];
   }
+  console.log(result);
   res.send(result);
 });
 
