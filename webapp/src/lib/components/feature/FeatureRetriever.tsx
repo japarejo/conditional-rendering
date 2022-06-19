@@ -2,6 +2,13 @@ import axios, { AxiosInstance } from "axios";
 import { attribute } from "lib/logic/model/Attribute";
 import { feature } from "lib/logic/model/Feature";
 import { NAryFunction } from "lib/logic/model/NAryFunction";
+import {
+  FeatureResponse,
+  FeatureResponse_Feature,
+  FeatureResponse_Feature_ValueType,
+} from "protobuf/featureResponse";
+import { Buffer } from "buffer";
+import { FeatureRequest as ProtoFeatureRequest } from "protobuf/featureRequest";
 
 export type AttributeValue = number | string;
 export type FeatureValue = boolean | AttributeValue;
@@ -65,11 +72,19 @@ export default class FeatureRetriever {
     this.queueMain = {};
 
     const ids = Object.keys(this.queueRequest);
-
+    const encodedIds = Buffer.from(ProtoFeatureRequest.encode({
+      features: ids,
+    }).finish());
     this.axiosInstance
-      .post<Record<string, FeatureValue>>(`/feature`, ids)
+      .post(`/feature`, encodedIds, {
+        headers: {
+          "Content-Type": "application/octet-stream",
+        }
+      })
       .then((response) => {
-        this.processFeatureResponse(response.data);
+        console.log(response);
+        const decoded = FeatureResponse.decode(Buffer.from(response.data));
+        this.processFeatureResponse(decoded);
         // Once we're done, set a new timeout.
         this.tickTimeout = setTimeout(
           () => this.tickRequestQueue(),
@@ -225,7 +240,8 @@ export default class FeatureRetriever {
    * Processes the map of features that came from the server
    * @param retrievedFeatures Dictionary of retrieved features
    */
-  processFeatureResponse(retrievedFeatures: Record<string, FeatureValue>) {
+  processFeatureResponse(featureResponse: FeatureResponse) {
+    const retrievedFeatures = featureResponse.featureMap;
     console.log("received features", retrievedFeatures);
     for (const featureId of Object.keys(retrievedFeatures)) {
       // Call relevant callbacks
@@ -249,9 +265,21 @@ export default class FeatureRetriever {
    * Updates the feature map with the given feature, and resolves
    * relevant pending feature requests.
    * @param id Id of the feature
-   * @param value Value of the feature
+   * @param feature Value of the feature
    */
-  setFeature(id: string, value: FeatureValue) {
+  setFeature(id: string, feature: FeatureResponse_Feature) {
+    let value: FeatureValue;
+    if (feature.valueType === FeatureResponse_Feature_ValueType.BOOLEAN) {
+      value = feature.booleanValue!;
+    } else if (
+      feature.valueType === FeatureResponse_Feature_ValueType.NUMERIC
+    ) {
+      value = feature.numericValue!;
+    } else if (feature.valueType === FeatureResponse_Feature_ValueType.STRING) {
+      value = feature.stringValue!;
+    } else {
+      throw new Error("Bad feature value type");
+    }
     this.featureMap[id] = value;
     // Call relevant pending callbacks and remove from queue
     for (const [featureId, featureRequest] of Object.entries(

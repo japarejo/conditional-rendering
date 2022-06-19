@@ -5,7 +5,9 @@
   "license": "MIT",
   "dependencies": {
     "@types/express": "^4.17.13",
-    "express": "^4.17.3"
+    "buffer": "^6.0.3",
+    "express": "^4.17.3",
+    "ts-proto": "^1.115.4"
   },
   "scripts": {
     "start": "tsc && node build/index.js"
