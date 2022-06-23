@@ -2,7 +2,6 @@
 // Code below
 import express from "express";
 import PetController from "./PetController";
-import cors from "cors";
 
 const app = express();
 
@@ -22,6 +21,9 @@ const FEATURE_MAP = {
   "pet-allowed-types": "dog cat bird snake",
 };
 
+
+// SOURCE: 
+// https://stackoverflow.com/questions/18310394/no-access-control-allow-origin-node-apache-port-issue
 
 // Add headers before the routes are defined
 app.use(function (req, res, next) {
@@ -62,10 +64,6 @@ app.post("/api/feature", async (req, res) => {
 
 // Defining a route
 app.use('/api/pet', PetController);
-
-// app.use(cors({
-//   origin: "http://localhost:3000"
-// }))
 
 app.listen(4000, () => {
   console.log("Example app listening on port 4000!");
