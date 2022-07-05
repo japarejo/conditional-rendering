@@ -33,10 +33,15 @@ app.post(
     console.log(decodedBody);
     const result: FeatureResponse = { featureMap: {} };
     for (const feature of features) {
-      console.log(feature);
-      const redisValue = await client.get(feature);
-      console.log(feature, redisValue);
-      const [type, featureValue] = redisValue.split("__");
+      let type, featureValue;
+      try {
+        const redisValue = await client.get(feature);
+        console.log(feature, redisValue);
+        [type, featureValue] = redisValue.split("__");
+      } catch {
+        res.status(400).send("Feature doesnt exist");
+        return;
+      }
       if (type === "number") {
         result.featureMap[feature] = {
           valueType: FeatureResponse_Feature_ValueType.NUMERIC,

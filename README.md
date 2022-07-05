@@ -6,6 +6,8 @@ Prerequisites:
 
 - Create a `.env` file with:
   ` REDIS_URL=redis://localhost:6379 `
+- Run the redis docker container:
+  `docker compose up`
 
 Seed redis
 
