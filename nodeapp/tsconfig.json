@@ -1,13 +1,14 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "es2022",
         "module": "commonjs",
+        "moduleResolution": "node",
         "sourceMap": true,
         "declaration": true,
         "outDir": "./build",
         "rootDir": "./src",
         "lib": [
-            "es2015",
+            "es2022",
             "dom"
         ],
         "types": [

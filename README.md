@@ -2,17 +2,33 @@
 
 ### Running the backend
 
+Prerequisites:
+
+- Create a `.env` file with:
+  ` REDIS_URL=redis://localhost:6379 `
+
+Seed redis
+
+```
+npm run seed
+```
+
+Run app
+
 ```
 cd nodeapp
 npm start
 ```
+
 The backend runs on port `4000`.
 
 ### Running the frontend
+
 ```
 cd webapp
 npm start
 ```
+
 The frontend runs on port `3000`.
 
 ### Compiling Protobuf files
