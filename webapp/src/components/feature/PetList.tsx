@@ -49,7 +49,7 @@ export default function PetList() {
 
   useEffect(() => {
     axios
-      .get<Pet[]>("/api/pet/list")
+      .get<Pet[]>("http://localhost:4000/api/pet/list")
       .then((data) => {
         setPets(data.data);
         setLoading(false);
